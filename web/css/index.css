@@ -1,0 +1,151 @@
+
+*{
+	margin: 0;
+	padding: 0;
+}
+
+body{
+	background-color: rgb(243,243,243);
+}
+
+/*.media{
+	margin-left: 0;
+	margin-right: 0;
+	border-style: solid;
+	background-color: rgb(0,0,0);
+}*/
+.left_background{
+	float: left;
+	position: absolute;
+	width:22%;
+	height: 100%;
+	z-index: -999;
+	background-image: url("../img/background_3.jpg"); 
+	background-size: cover;
+	background-position: center center; 
+	/*background-attachment: fixed;*/
+	/*background-repeat: no-repeat;*/
+
+}
+.right_background{
+	position: absolute;
+	margin-left: 78%;
+	width:22%;
+	z-index: -999;
+	height: 100%;
+	background-image: url("../img/background_3.jpg"); 
+	background-size: cover;
+	background-position: center center; 
+	/*background-attachment: fixed;*/
+	background-repeat: local;
+}
+
+.center_background{
+	padding: 0;
+	position: absolute;
+	margin-left: 22%;
+	width: 56%;
+	height: 100%;
+	z-index: -998;
+	background-image: url("../img/background_6.jpg"); 
+	background-size: cover;
+	background-position: center center; 
+	/*background-attachment: fixed;*/
+	background-repeat: no-repeat;
+	
+}
+
+.media{
+	background-color:(243,243,243); 
+	z-index:500;
+}
+
+.container{
+	padding-left: 0;
+	padding-right: 0;
+	margin: 0 auto;
+	/*border-radius:10px;*/
+	width:56%;
+	height:100%;
+	/*background-color: rgba(230,10,10,0);*/
+}
+.form-group{
+	margin-bottom: 0;
+}
+
+.form{
+	background-color: rgb(243,243,243);
+	margin-top: 4%;
+	margin-right: 2%;
+	margin-bottom: 0;
+	/*margin-left: 1%*/
+
+	padding-left: 6%;
+	
+}
+
+.guideText{
+	color: rgb(160,33,33); 
+	font-family:"Comic Sans MS", cursive, sans-serif;
+}
+
+.text{
+	margin-left: 0;
+	width: 90%;
+	padding: 0;
+}
+.inputField{
+	width: 100%;
+	border-radius:5px;
+	height: 28px;
+	font-size: 14px; 
+	position:relative;
+	border-color:rgb(160,33,33);
+	color: rgb(160,33,33); 
+	font-family:"Comic Sans MS", cursive, sans-serif;
+}
+/*textarea:focus{
+	height: 100px;
+
+}*/
+
+.submit{
+	margin-right: 1%;
+	margin-top: 2%;
+}
+
+.btn{
+	border-color:rgb(120,33,33);
+	width: 73px;
+	font-family:"Comic Sans MS", cursive, sans-serif;
+}
+
+.tweets{
+	background-color:rgba(243,243,243,0.8);
+	font-family:"Comic Sans MS", cursive, sans-serif;
+}
+.underline_form{
+	width: 90%;
+	padding-top: 4%;
+	padding-right: 0;
+	margin-right: 0;
+	margin-top: 0;
+	/*margin-bottom: 1%;*/
+	/*margin-left: 4%;*/
+	border-bottom: 1px dashed rgb(120,40,40);
+}
+
+.media{
+	padding-top: 2%;
+	padding-bottom: 2%;
+	padding-left: 2%;
+	padding-right: 2%;
+	margin-top: 0;
+	margin-left: 4%;
+	margin-right: 9%;
+	border-bottom: 1px dashed rgb(120,40,40);
+}
+.media:hover{
+	background-color: rgba(180,50,50,0.2);
+}
+

@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+	<head>
+    	<meta charset="utf-8">
+    	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+    	<meta name="viewport" content="width=device-width, initial-scale=1">
+    	<!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+	    <title>Football</title>
+	    <!-- Bootstrap -->
+	    <link href="css/bootstrap.min.css" rel="stylesheet">
+	    <link href="css/index.css" rel="stylesheet">
+      
+
+      <!-- <script src="../server/ajax.js" ></script> -->
+      <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+
+	    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+	    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+	    <!--[if lt IE 9]>
+	      <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+	      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+	    <![endif]-->
+	</head>
+
+  	<!--<body style="background-image: url(img/background_1.jpg); background-size: 100%;>-->
+  	<body>
+      <div class="left_background"></div>
+      <div class="right_background"></div>
+      <div class="center_background"></div>
+    	<div class="container">
+      		<div class="row clearfix">
+        		<div class="col-md-12 column">
+        		</div>
+      		</div>
+      		<div class="row clearfix">
+        		<div class="col-md-12 column">
+          			<form class="form-horizontal form" role="form" id="formSearch">	
+              		  <div class="form-group">
+      						      <div class="col-md-10 text">
+                           <h5 class="guideText">What you want to search:</h5>
+      							       <textarea class="col-md-12 inputField" id="player_club" name="player_club" placeholder="e.g.“@waynerooney” OR “#Rooney” AND “@manutd”"/></textarea>
+      						      </div>
+                        <div class="col-md-10 text">
+                          <h5 class="guideText">Whom you want to search from:</h5>
+                           <textarea class="col-md-12 inputField" id="author" name="author" placeholder=  "e.g.@waynerooney"></textarea>
+                        </div>
+      						      <div class="col-md-9"></div>
+      						      <div class="col-md-1 submit" >
+                    			<button class="btn btn-default" id="submit" type='button' style="color:rgb(160,33,33)">Submit</button>
+                	     </div>
+                       <div id="underline_form"><div class="col-md-12 underline_form"></div></div>
+              		</div>
+      				</form>
+      		<!-- <div class="row clearfix">
+        		<div class="col-md-12 column"> -->
+              <div id="tweets" class="tweets"></div>
+	        	</div>
+	      	</div>
+    	</div>
+
+
+    <script type="text/javascript">
+        function sendAjaxQuery(url, data) { 
+            $('#tweets').load('index.html'+' #tweets');
+            $.ajax({
+                type: 'POST',
+                url: 'postFile.html',
+                data: data,
+                // dataType: 'json',
+                success: function (data) {
+                  var jsonList = JSON.parse(data);
+                  //console.log(jsonList);
+                  // $('#underline_form').append('<div class="col-md-12 underline_form"></div>');
+                  for(var i in jsonList.data){
+                        var list = jsonList.data[i];
+                        // var struct = JSON.parse(jsonList.data[i]);
+                        
+                        $('#tweets').append('<div class="media">'
+                                    +'<a href="#" class="pull-left" style="padding-right:15px;">'
+                                    +'<img src="'+list.author_profile_image+'" class="media-object" alt="" style="border-radius:10px;"/>'
+                                    +'</a>'
+                                    +'<div class="media-body">'
+                                    +'<h4 class="media-heading"><a href="https://twitter.com/'+list.author+'">'+list.author+'</a></h4>'
+                                    +'<a style="color:black" href="https://twitter.com/'+list.author+'/status/'+list.tweet_id+'">'+list.contents+'</a>'
+                                    +'</div></div>');
+                       
+                  }
+
+                },
+                error: function (xhr, status, error) { 
+                    console.log('Error: ', error);
+                    alert('error connecting'); 
+                }
+            });
+        }
+
+        $.fn.serializeObject = function () {
+            var o = {};
+            var a = this.serializeArray();
+            $.each(a, function () {
+                if (o[this.name] !== undefined) {
+                    if (!o[this.name].push) {
+                        o[this.name] = [o[this.name]];
+                    }
+                    o[this.name].push(this.value || '');
+                } else {
+                    o[this.name] = this.value || '';
+                }
+            });
+            return o;
+        };
+
+        function sendData(){
+            var form = document.getElementById('submit');
+            sendAjaxQuery('http://localhost:3000/', JSON.stringify($('form').serializeObject()));
+        };
+
+        var submit = document.getElementById('submit');
+        submit.onclick=sendData;
+        
+        // $("#submit").click(sendData);
+
+    </script>
+  </body>
+</html>
