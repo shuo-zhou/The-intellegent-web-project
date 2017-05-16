@@ -18,10 +18,10 @@ function queryTwitter(player_club,author,func){
 	DB.getQueryID(dbQuery,function(queryID){//check whether query in the DB or not
 		if (queryID == null){
 			//insert a new query to the database if the query not in the QUery table
-			DB.addQuery(dbQuery);
-			DB.getQueryID(dbQuery,function(queryID){
-				searchTweets(queryID);//search new tweets and insert into database
-				DB.getTweets(queryID,function(tweetList){
+			DB.addQuery(dbQuery,function(queryID){
+				
+				searchTweets(queryID,function(tweetList){
+					
 					var tweetJson = {
                   		data:tweetList
                 	};
@@ -29,22 +29,25 @@ function queryTwitter(player_club,author,func){
 					//search new tweets and insert into database
 					var tweetListString = JSON.stringify(tweetJson);
 					if(func !=null){func(tweetListString);}
-				});
+					
+				});//search new tweets and insert into database
 			});
+			
 		}else{
-			searchTweets(queryID);
-			DB.getTweets(queryID,function(tweetList){
+			searchTweets(queryID,function(tweetList){
+				
 				var tweetJson = {
                   		data:tweetList
                 };
 				var tweetListString = JSON.stringify(tweetJson);
 				if(func !=null){func(tweetListString);}
 			});
+			
 		}
 	});
 }
 
-function searchTweets(queryID){//search new tweets and insert into database
+function searchTweets(queryID,func){//search new tweets and insert into database
 	var DB = require('./DB.js');
 	DB.getQuery(queryID,function(dbQuery, lastQueryDate, lastQueryID){
 		var query = '';
@@ -54,18 +57,19 @@ function searchTweets(queryID){//search new tweets and insert into database
 			query = dbQuery;
 		}
 		//console.log(query);
-		client.get('search/tweets', {q: query, count: 20 },function(err, data, response) {
+		client.get('search/tweets', {q: query, count: 100 },function(err, data, response) {
         	newTweets = []
           //console.log(data.statuses);
         	for (var indx in data.statuses) {
         		//break the loop if the last tweet in the database was found in this query
         		//avoid storing same tweets
-				        var tweet= data.statuses[indx];
+				var tweet= data.statuses[indx];
                 //console.log(tweet.id_str);
                 //console.log(lastQueryID);
                 if (tweet.id_str == lastQueryID){break;}
+                var date = new Date(tweet.created_at);
 				if (indx == 0) {// update the Query table
-					var date = new Date(tweet.created_at);
+
 					var day = date.getDate().toString();
 					var month = date.getMonth()+1;
 					var year = date.getFullYear().toString();
@@ -78,16 +82,23 @@ function searchTweets(queryID){//search new tweets and insert into database
 					author: tweet.user.screen_name,
 					author_id: tweet.user.id_str,
 					author_profile_image: tweet.user.profile_image_url_https,
-					time: tweet.created_at,
+					time_str: tweet.created_at,
+          time: date,
 					contents: tweet.text,
 					query_id: queryID});
 			}
       //console.log(newTweets);
 			//sotre data to database
-			DB.storeIntoDb(newTweets);
+			DB.storeIntoDb(newTweets,queryID, function(tweetList){
+				if(func!=null){
+					func(tweetList);
+				}
+			});
 		});
 
 	});
+
+	
 }
 
 exports.queryTwitter = queryTwitter;
