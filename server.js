@@ -9,13 +9,14 @@ var querystring = require('querystring');
 var express = require('express');
 
 var twit = require("./server/twit.js")
+var dbPedia = require("./server/usersShow.js")
 
 var file = new static.Server();
 var portNo = 3000;
 
 var app = protocol.createServer(function (req, res) {
     var pathname = url.parse(req.url).pathname;
-
+    var jsonList;
     if ((req.method == 'POST') && (pathname == '/webapp/postFile.html')) {
         var body = '';
         req.on('data', function (data) {
@@ -25,25 +26,32 @@ var app = protocol.createServer(function (req, res) {
             if (body.length > 1e6) {
                 res.writeHead(413,
                 {'Content-Type': 'text/plain'}).end();
-                req.connection.destroy(); 
+                req.connection.destroy();
             }
 
         });
-        
+
         req.on('end', function () {
             var param = JSON.parse(body);
-            var jsonList;
-            twit.queryTwitter(param.player_club,param.author,function(tweetListString){
-                res.writeHead(200, {"Content-Type": "text/plain"});
-                //console.log(tweetListString);
-                jsonList = tweetListString;
-                res.end(jsonList);
+
+            twit.queryTwitter(param.player,param.playerTeam,param.team,param.teamAuthor,param.author,function(tweetListString){
+                dbPedia.searchName(param.author,function(name){
+                    console.log(name);
+
+                    res.writeHead(200, {"Content-Type": "text/plain"});
+                    //console.log(tweetListString);
+                    this.jsonList = tweetListString;
+                    res.end(this.jsonList);
+                });
+                // integrate this part into dbPedia.searchName()********************************
+                // res.writeHead(200, {"Content-Type": "text/plain"});
+                // //console.log(tweetListString);
+                // jsonList = tweetListString;
+                // res.end(jsonList);
             });
-            //console.log("output:",jsonList);
-            
 
         });
-    
+
     }
     else {
         file.serve(req, res, function (err, result) {
