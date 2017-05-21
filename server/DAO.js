@@ -10,7 +10,7 @@ connection.connect();
 var howManySoFar;
 
 //
-function storeIntoDb(tweetList,queryID,func){//insert new Tweets into the Tweet table
+function storeIntoDb(tweetList,func){//insert new Tweets into the Tweet table
 	//console.log(tweetList);
 	howManySoFar=0;
 	for (var ix=0; ix< tweetList.length; ix++){
@@ -27,16 +27,18 @@ function storeIntoDb(tweetList,queryID,func){//insert new Tweets into the Tweet 
 
 function getTweets(dbQuery,func){//get tweets from database
 	//var tweetList = [];
+  var idList = []
 	var tweetList = [];
-	connection.query('?',query_id,
-	function(err, rows, field){
+  var isEmpty = true;
+	connection.query(dbQuery,	function(err, rows, field){
 		//console.log(rows);
 		if(err) throw err;
         for (var i in rows) {
             tweetList.push(rows[i]);
+            idList.push(rows[i].tweet_id);
         }
         if(func !=null){
-		func(tweetList);
+		func(tweetList,idList);
 		}
 	});
 }
