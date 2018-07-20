@@ -1,3 +1,19 @@
+/*
+* Author Shuo Zhou, University of Sheffield 
+* This file contains two functions: 
+* queryTwitter: generate queries, retrieve data from database and twitter 
+* api, return an array of tweets
+* searchTweets: search new tweets, return an array of tweets and store 
+* into database. SearchTweets contains a recurisve function implemented 
+* for retrieving at least 300 tweets if possible. The recursive process 
+* may runnning a longer time
+*
+* queryTwitter is a public function
+* searchTweets is a private function
+* 
+*/
+
+
 var Twit = require('twit');
 var client = new Twit({
   consumer_key: 'q94xTrkN1r9tkFBKS1kDy8XdC',
@@ -6,120 +22,155 @@ var client = new Twit({
   access_token_secret: 'TyU5buOXn0beRaHgS8HJAK8fUQgwJMezfzTIXXqGKx7TS'
 });
 
-function queryTwitter(player,playerTeam,team,teamAuthor,author,func){
-	//var DB = require('./DB.js');
+function queryTwitter(player,playerTeam,team,teamAuthor,author,DBOnly,func){
+
   var DAO = require('./DAO.js')
+  //########################################################
+  //generate query for search data
+  //twitQuery for search data by twitter api
+  //dbQuery for search data from database
   var twitQuery='';
 	var dbQuery = '';
+  var temp_p = '';
+  var temp_t = '';
+  var temp_a = '';
   if (player!=''){//check whether player included in query
     var p = player.split(" ");
-    twitQuery = twitQuery+p[0];
-    dbQuery = dbQuery+" where contents LIKE \'%"+p[0]+"%\'";
+    temp_p = p[0].toLowerCase();
+    twitQuery = twitQuery+temp_p;
+    dbQuery = dbQuery+" where (lower(contents) LIKE \'%"+temp_p+"%\'";
     for (i=1;i<p.length;i++){
-      if (p[i]!=" "){
-        if (p[i].toLowerCase()!='or') {
-          twitQuery=twitQuery+' OR '+p[i];
-          dbQuery=dbQuery+" OR contents LIKE \'%"+p[i]+"%\'";
+      if (p[i]!=""){
+        temp_p=p[i].toLowerCase();
+        if (temp_p!='or') {
+          twitQuery=twitQuery+' OR '+temp_p;
+          dbQuery=dbQuery+" OR lower(contents) LIKE \'%"+temp_p+"%\'";
         }//end if
       }//end if
     }//end for
+    dbQuery = dbQuery+")";
     if(team!=''){//check whether team included in query
       var t = team.split(" ");
+      temp_t = t[0].toLowerCase();
       if(playerTeam=='AND'){
-        twitQuery=twitQuery+' '+t[0];
-        dbQuery=dbQuery+" AND contents LIKE \'%"+t[0]+"%\'";
+        twitQuery=twitQuery+' '+temp_t;
+        dbQuery=dbQuery+" AND (lower(contents) LIKE \'%"+temp_t+"%\'";
       }else{
-        twitQuery=twitQuery+' OR '+t[0];
-        dbQuery=dbQuery+" OR contetns LIKE \'%"+t[0]+"%\'";
+        twitQuery=twitQuery+' OR '+temp_t;
+        dbQuery=dbQuery+" OR (lower(contents) LIKE \'%"+temp_t+"%\'";
       }//end else
       for (i=1;i<t.length;i++){
-        if (t[i]!=" ") {
+        if (t[i]!="") {
+          temp_t = t[i].toLowerCase();
           if (t[i].toLowerCase()!='or') {
-            twitQuery=twitQuery+' OR '+t[i];
-            dbQuery=dbQuery+" OR contents LIKE \'%"+t[i]+"%\'";
+            twitQuery=twitQuery+' OR '+temp_t;
+            dbQuery=dbQuery+" OR lower(contents) LIKE \'%"+temp_t+"%\'";
           }//end if
         }//end if
       }//end for
+      dbQuery = dbQuery + ")";
     }//end if(team)
   }else{
     if(team!=''){//check whether team included in query
       var t = team.split(" ");
-      twitQuery=twitQuery+' '+t[0];
-      dbQuery = dbQuery+" where contents LIKE \'%"+t[0]+"%\'";
+      temp_t = t[0].toLowerCase();
+      twitQuery=twitQuery+temp_t;
+      dbQuery = dbQuery+" where (lower(contents) LIKE \'%"+temp_t+"%\'";
       for (i=1;i<t.length;i++){
-        if(t[i]!=" "){
-          if (t[i].toLowerCase()!='or') {
-            twitQuery=twitQuery+' OR '+t[i];
-            dbQuery=dbQuery+" OR contents LIKE \'%"+t[i]+"%\'";
+        if(t[i]!=""){
+          temp_t = t[i].toLowerCase();
+          if (temp_t!='or') {
+            twitQuery=twitQuery+' OR '+temp_t;
+            dbQuery=dbQuery+" OR lower(contents) LIKE \'%"+temp_t+"%\'";
           }//end if
         }//end if
       }//end for
+      dbQuery = dbQuery+")";
     }//end if
   }//end else
     if(author!=''){//check whether author included in query
       var a = author.split(" ");
+      temp_a = a[0].toLowerCase()
       if(twitQuery==''){
-        twitQuery=twitQuery+'from:'+a[0];
-        dbQuery=dbQuery+" where author LIKE \'%"+a[0]+"%\'";
+        twitQuery=twitQuery+'(from:'+temp_a;
+        dbQuery=dbQuery+" where (lower(author) = '"+temp_a+"'";
       }else if(teamAuthor=='AND'){
-        twitQuery=twitQuery+' from:'+a[0];
-        dbQuery=dbQuery+" AND author LIKE '%"+a[0]+"%'";
+        twitQuery=twitQuery+' (from:'+temp_a;
+        dbQuery=dbQuery+" AND (lower(author) = '"+temp_a+"'";
       }else{
-        twitQuery=twitQuery+' OR from:'+a[0];
-        dbQuery=dbQuery+" OR author LIKE '%"+a[0]+"%'";
+        twitQuery=twitQuery+' OR (from:'+temp_a;
+        dbQuery=dbQuery+" OR (lower(author) = '"+temp_a+"'";
       }
         for (i=1;i<a.length;i++){
-          if (a[i].toLowerCase()!='or') {
-            twitQuery=twitQuery+' OR '+a[i];
-            dbQuery=dbQuery+" OR author LIKE '%"+a[i]+"%'";
+          if (a[i]!="") {
+            temp_a = a[i].toLowerCase()
+            if (temp_a!='or') {
+              twitQuery=twitQuery+' OR from:'+temp_a;
+              dbQuery=dbQuery+" OR lower(author) = '"+temp_a+"'";
+            }//end if
           }//end if
         }//end for
+        dbQuery = dbQuery+")";
+        twitQuery = twitQuery+")";
       }//end if(author)
       dbQuery = "select * from tweetTable" + dbQuery;
       dbQuery = dbQuery+" ORDER BY time DESC;";
-
-
-
-  DAO.getTweets(dbQuery,function(tweetList,idList){
-
-    searchTweets(tweetList,idList,twitQuery,function(results){
-      var tweetJson = {
-                    data:results
-              };
-      var resultString = JSON.stringify(tweetJson);
-      if(func !=null){func(resultString);}
-    })
-  });
+      // end of generate queries
+      //###################################################
+      var serverNum=0;
+      var twitNum=0;
+      if (DBOnly==null) {
+        DAO.isQueried(twitQuery,function(queried){
+          if (queried==true) {//search from databse if query exists
+            var lastID = null;
+            DAO.getTweets(dbQuery,lastID,function(tweetList){
+              //search from twitter api
+              serverNum = tweetList.length;
+              searchTweets(tweetList,twitQuery,function(results){
+                twitNum = results.length-serverNum;
+                if(func !=null){func(results,serverNum,twitNum);}
+              });
+            });
+          }else{//search from twitter api directly if query not exists
+            var tweetList=[];
+            searchTweets(tweetList,twitQuery,function(results){
+              twitNum = results.length - serverNum;
+              if(func !=null){func(results,serverNum,twitNum);}
+            });
+            DAO.addQuery(twitQuery);
+          }
+        });
+      }else {
+        var lastID = null;
+        DAO.getTweets(dbQuery,lastID,function(tweetList){
+          serverNum = tweetList.length;
+          if(func !=null){func(tweetList,serverNum,twitNum);}
+        });//only return the results from database if tick the box
+        //of only search from local database
+      }
 }//end function
 
-function searchTweets(tweetList,idList,twitQuery,func){//search new tweets and insert into database
-	//var DB = require('./DB.js');
+
+function searchTweets(tweetList,twitQuery,func){//search new tweets and insert into database
   var DAO = require('./DAO.js');
   var isEmpty = true;
   if (tweetList.length!=0){
     isEmpty = false;
   }
-  //console.log(tweetListString);
-  //var lastTweetTime =null;
-  //var earlyTweetTime=null;
+  var searchQuery = twitQuery;
+  var newIDList = [];
   var lastTweetID='';
-  var earlyTweetID='';
   if (isEmpty==false){
-    lastTweetTime=new Date(tweetList[0].dateTime_str);
+    lastTweetID=tweetList[0].tweet_id;
     //lastTweetID=tweetList[0].tweet_id;
-    twitQuery=twitQuery+' since:'+lastTweetTime.getFullYear().toString()+'-'+
-    (lastTweetTime.getMonth()+1).toString()+'-'+lastTweetTime.getDate().toString();
+    searchQuery = twitQuery+' since_id:'+lastTweetID;
   }
-  console.log(twitQuery);
 
-	client.get('search/tweets', {q: twitQuery, count: 10},function(err, data, response) {
-  //console.log(data.statuses);
+	client.get('search/tweets', {q: searchQuery, count: 100},function(err, data, response) {
       var newTweets = [];
       for (var indx in data.statuses) {
-
-
 		    var tweet= data.statuses[indx];
-        if (idList.indexOf(tweet.id_str)!=-1){continue;}//avoid storing same tweets
+        //if (idList.indexOf(tweet.id_str)==-1){//avoid storing same tweets
         var date = new Date(tweet.created_at);
         newTweets.push({
           tweet_id: tweet.id_str,
@@ -131,10 +182,8 @@ function searchTweets(tweetList,idList,twitQuery,func){//search new tweets and i
           time: date,
     			contents: tweet.text,
     		});
-      //console.log(newTweets);
-			//sotre data to database
-
       }//end for
+
 
       DAO.storeIntoDb(newTweets);
       var results;
@@ -143,15 +192,57 @@ function searchTweets(tweetList,idList,twitQuery,func){//search new tweets and i
       }else{
         results = newTweets.concat(tweetList);
       }
-      if(func !=null){
-        func(results);
 
-      }
+      if (results.length<=300){
+        //recurrent fuction for retrieving at least 300 twitters
+      var searchEarlyTweets = function(tweetList,twitQuery){
+        var maxID = "";
+        var searchQuery = twitQuery;
+        var earlyTweetID='';
+        var num = tweetList.length
 
+        if (tweetList.length!=0){
+          earlyTweetID=tweetList[tweetList.length-1].tweet_id;
+          //lastTweetID=tweetList[0].tweet_id;
+          searchQuery = twitQuery+' max_id:'+earlyTweetID;
+        }
 
+      	client.get('search/tweets', {q: searchQuery, count: 100},function(err, data, response) {
+            var newTweets = [];
+            for (var indx in data.statuses) {
+      		    var tweet= data.statuses[indx];
+              //if (idList.indexOf(tweet.id_str)==-1){//avoid storing same tweets
+              var date = new Date(tweet.created_at);
+              newTweets.push({
+                tweet_id: tweet.id_str,
+      				  author: tweet.user.screen_name,
+      				  author_id: tweet.user.id_str,
+          			author_profile_image: tweet.user.profile_image_url_https,
+          			dateTime_str: tweet.created_at,
+                date: date,
+                time: date,
+          			contents: tweet.text,
+          		});
+            }//end for
+            DAO.storeIntoDb(newTweets);
+            tweetList = tweetList.concat(newTweets);
+            if ((tweetList.length>=300) || (newTweets.length<100)) {
+              if (func!=null){
+                func(tweetList);
+              }
+            }else{
+              searchEarlyTweets(tweetList,twitQuery);
+            }
+          });
+        }//end searchEarlyTweets
+        searchEarlyTweets(results,twitQuery);
+      }else{
+        if (func!=null){
+          func(results);
+        }
+      }//end if
 	});//end searchTweets
-
-
 }//end function
+
 
 exports.queryTwitter = queryTwitter;

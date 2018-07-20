@@ -1,5 +1,6 @@
 /**
- * Created by fabio on 18/02/15.
+ * server listen to port 3000
+ * Created by Yongshuo on 20/03/2017.
  */
 var protocol = require('http');
 var static = require('node-static');
@@ -8,8 +9,9 @@ var url = require('url');
 var querystring = require('querystring');
 var express = require('express');
 
-var twit = require("./server/twit.js")
-var dbPedia = require("./server/usersShow.js")
+var twit = require("./server/twit.js");
+var dbPedia = require("./server/usersInfo.js");
+var twitMobile = require("./server/twitMobile.js");
 
 var file = new static.Server();
 var portNo = 3000;
@@ -17,7 +19,42 @@ var portNo = 3000;
 var app = protocol.createServer(function (req, res) {
     var pathname = url.parse(req.url).pathname;
     var jsonList;
-    if ((req.method == 'POST') && (pathname == '/webapp/postFile.html')) {
+
+    // for mobile
+    if ((req.method == 'POST') && (pathname == '/mobileFile.html')) {
+        var body = '';
+        req.on('data', function (data) {
+            body += data;
+            // if body > 1e6 === 1 * Math.pow(10, 6) ~~~ 1MB // flood attack or faulty client
+            // (code 413: req entity too large), kill req
+            if (body.length > 1e6) {
+                res.writeHead(413,
+                {'Content-Type': 'text/plain'}).end();
+                req.connection.destroy();
+            }
+        });
+        req.on('end', function () {
+            var param = JSON.parse(body);
+            //console.log(param);
+            twitMobile.queryTwitter(param.dbQuery,param.twitQuery,param.lastID,param.firstID,param.queryExist
+                ,function(tweetList,serverNum,twitNum){
+                dbPedia.getUser(param.player,param.author,function(info){
+                        var wholeData = {
+                            info:info,
+                            data:tweetList,
+                            serverNum:serverNum,
+                            twitNum:twitNum
+                        };
+                        var responseJson = JSON.stringify(wholeData);
+
+                        res.writeHead(200, {"Content-Type": "text/plain"});
+                        res.end(responseJson);
+                    });
+            });
+        });
+
+     // for pc
+    }else if ((req.method == 'POST') && (pathname == '/webapp/postFile.html')) {
         var body = '';
         req.on('data', function (data) {
             body += data;
@@ -30,28 +67,24 @@ var app = protocol.createServer(function (req, res) {
             }
 
         });
-
         req.on('end', function () {
             var param = JSON.parse(body);
+            twit.queryTwitter(param.player,param.playerTeam,param.team,param.teamAuthor,param.author,param.DBOnly
+                ,function(tweetList,serverNum,twitNum){
+                dbPedia.getUser(param.player,param.author,function(info){
+                        var wholeData = {
+                            info:info,
+                            data:tweetList,
+                            serverNum:serverNum,
+                            twitNum:twitNum
+                        };
+                        var responseJson = JSON.stringify(wholeData);
 
-            twit.queryTwitter(param.player,param.playerTeam,param.team,param.teamAuthor,param.author,function(tweetListString){
-                dbPedia.searchName(param.author,function(name){
-                    console.log(name);
-
-                    res.writeHead(200, {"Content-Type": "text/plain"});
-                    //console.log(tweetListString);
-                    this.jsonList = tweetListString;
-                    res.end(this.jsonList);
-                });
-                // integrate this part into dbPedia.searchName()********************************
-                // res.writeHead(200, {"Content-Type": "text/plain"});
-                // //console.log(tweetListString);
-                // jsonList = tweetListString;
-                // res.end(jsonList);
+                        res.writeHead(200, {"Content-Type": "text/plain"});
+                        res.end(responseJson);
+                    });
             });
-
         });
-
     }
     else {
         file.serve(req, res, function (err, result) {
