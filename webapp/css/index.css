@@ -1,0 +1,206 @@
+
+*{
+	margin: 0;
+	padding: 0;
+}
+
+body{
+	background-color: rgb(243,243,243);
+	font-family:"Comic Sans MS", cursive, sans-serif;
+}
+
+/*.media{
+	margin-left: 0;
+	margin-right: 0;
+	border-style: solid;
+	background-color: rgb(0,0,0);
+}*/
+
+.left_background{
+	float: left;
+	position: absolute;
+	width:22%;
+	height: 100%;
+	z-index: -999;
+	/*background-image: url("../img/background_3.jpg"); */
+	background-size: cover;
+	background-position: center center; 
+	/*background-attachment: fixed;*/
+	/*background-repeat: no-repeat;*/
+}
+
+
+
+.playerInfo{
+	margin-top: 10%;
+	margin-left: 8%;
+	font-family: "Comic Sans MS";
+
+}
+.playerName{
+	font-size: 20px;
+	color: rgb(100,100,100);    /*#7E7765;*/
+	margin-top: 4%;
+}
+.playerImage{
+	margin-top: 5%;
+	max-width: 150px;
+    height: 80px;
+}
+
+.playerProperty{
+	font-size: 15px;
+	color: rgb(130,130,130);  /*#4D3462;*/
+	margin-top: 2%;
+}
+
+.right_background{
+	position: absolute;
+	margin-left: 78%;
+	width:22%;
+	z-index: -999;
+	height: 100%;
+	/*background-image: url("../img/background_3.jpg"); */
+	background-size: cover;
+	background-position: center center; 
+	/*background-attachment: fixed;*/
+	background-repeat: local;
+}
+
+.chartContainer{
+	margin-top: 15%;
+	/*margin-left: 3%;*/
+	margin-right:0; 
+	margin-bottom: 20px;
+	height: 300px; 
+	width: 100%;
+	
+}
+
+.center_background{
+	padding: 0;
+	position: absolute;
+	margin-left: 22%;
+	width: 56%;
+	height: 100%;
+	z-index: -998;
+	background-image: url("../img/background_6.jpg"); 
+	background-size: cover;
+	background-position: center center; 
+	/*background-attachment: fixed;*/
+	background-repeat: no-repeat;
+	
+}
+
+.media{
+	background-color:(243,243,243); 
+	z-index:500;
+}
+
+.container{
+	padding-left: 0;
+	padding-right: 0;
+	margin: 0 auto;
+	/*border-radius:10px;*/
+	width:56%;
+	height:100%;
+	/*background-color: rgba(230,10,10,0);*/
+}
+.form-group{
+	margin-bottom: 0;
+}
+
+.form{
+	background-color: rgba(243,243,243,0.8);
+	margin-top: 4%;
+	margin-right: 2%;
+	margin-bottom: 0;
+	/*margin-left: 1%*/
+
+	padding-left: 6%;
+	
+}
+
+.guideText{
+	color: rgb(160,33,33); 
+	
+}
+
+.text{
+	margin-left: 0;
+	width: 90%;
+	padding: 0;
+}
+.inputField{
+	width: 100%;
+	border-radius:5px;
+	height: 28px;
+	font-size: 14px; 
+	position:relative;
+	border-color:rgb(160,33,33);
+	color: rgb(160,33,33); 
+	/*font-family:"Comic Sans MS", cursive, sans-serif;*/
+}
+/*textarea:focus{
+	height: 100px;
+
+}*/
+
+.submit{
+	margin-right: 1%;
+	margin-top: 2%;
+	padding-bottom: 1%;
+}
+
+.btn{
+	border-color:rgb(120,33,33);
+	color:rgb(160,33,33);
+	width: 73px;
+}
+
+.searchNumbers{
+	text-align: center;
+	color: black;
+	background-color:rgba(243,243,243,0.8);
+	opacity: 0.8;
+}
+
+.tweets{
+	background-color:rgba(243,243,243,0.8);
+	/*font-family:"Comic Sans MS", cursive, sans-serif;*/
+}
+.underline_form{
+	width: 90%;
+	padding-top: 0;
+	padding-right: 0;
+	margin-right: 0;
+	margin-top: 0;
+	/*margin-bottom: 1%;*/
+	/*margin-left: 4%;*/
+	border-bottom: 1px dashed rgb(120,40,40);
+}
+
+.media{
+	padding-top: 2%;
+	padding-bottom: 2%;
+	padding-left: 2%;
+	padding-right: 2%;
+	margin-top: 0;
+	margin-left: 4%;
+	margin-right: 9%;
+	border-bottom: 1px dashed rgb(120,40,40);
+}
+.media:hover{
+	background-color: rgba(180,50,50,0.2);
+}
+.date_string{
+	font-size: 12px; 
+	color: rgb(150,150,150);
+	margin: 0 0 4px;
+}
+
+.queryTimes{
+	margin-left: 20%;
+}
+
+
