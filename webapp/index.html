@@ -12,15 +12,24 @@
 	    <link href="css/bootstrap.min.css" rel="stylesheet">
 	    <link href="css/index.css" rel="stylesheet">
       
-
       <!-- <script src="../server/ajax.js" ></script> -->
       <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
       <script type="text/javascript" src="js/jquery-1.11.1.min.js"></script>
+      <script type="text/javascript" src="js/moment-with-locales.js"></script>
       <script type="text/javascript" src="http://canvasjs.com/assets/script/canvasjs.min.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.js"></script>
+      <script type="text/javascript" src="js/index.js"></script>
+      <script type="text/javascript" src="js/DBpedia.js"></script>
 
   	<body>
-      <div class="left_background"></div>
-      <div class="right_background"></div>
+      <div class="left_background">
+        <div id="playerInfo" class="playerInfo"></div>
+      </div> 
+      <div class="right_background">
+        <!--<div id="chartContainer" class="chartContainer"></div>-->
+        <canvas id="myChart" width="200" height="300"></canvas>
+        <div id = "frequency"></div>
+      </div>
       <div class="center_background"></div>
     	<div class="container">
       		<div class="row clearfix">
@@ -32,92 +41,92 @@
           			<form class="form-horizontal form" role="form" id="formSearch">	
               		  <div class="form-group">
       						      <div class="col-md-10 text">
-                           <h5 class="guideText">What you want to search:</h5>
-      							       <textarea class="col-md-12 inputField" id="player_club" name="player_club" placeholder="e.g. @waynerooney OR #Rooney AND @manutd"/></textarea>
+                          <h5 class="guideText">The player you want to search:</h5>
+                          <textarea class="col-md-12 inputField" id="player" name="player" placeholder="Rooney"/></textarea>
       						      </div>
+
+                        <div class="col-md-4 checkbox" id = "playerTeam">
+                           <label><input type="checkbox" name = "playerTeam" value = "OR" checked/>OR</label>
+                           <label><input type="checkbox" name = "playerTeam" value = "AND" />AND</label>
+                        </div> 
+
                         <div class="col-md-10 text">
-                          <h5 class="guideText">Whom you want to search from:</h5>
-                           <textarea class="col-md-12 inputField" id="author" name="author" placeholder=  "e.g.@waynerooney"></textarea>
+                          <h5 class="guideText">The team you want to search:</h5>
+                           <textarea class="col-md-12 inputField" id="team" name="team" placeholder="Manchester United"></textarea>
                         </div>
-      						      <div class="col-md-9"></div>
+
+                        <div class="col-md-4 checkbox" id = "teamAuthor">
+                           <label><input type="checkbox" name = "teamAuthor" value = "OR" checked/>OR</label>
+                           <label><input type="checkbox" name = "teamAuthor" value = "AND" />AND</label>
+                        </div> 
+
+                        <div class="col-md-10 text">
+                          <h5 class="guideText">The author you want to search from:</h5>
+                           <textarea class="col-md-12 inputField" id="author" name="author" placeholder="waynerooney"></textarea>
+                        </div>
+
+
+      						      <div class="col-md-9 checkbox">
+                          <label><input type="checkbox" name = "DBOnly" value = "DBOnly"/>only search from database</label>
+                        </div>
       						      <div class="col-md-1 submit" >
                     			<button class="btn btn-default" id="submit" type='button'>Submit</button>
                 	     </div>
+
                        <div id="underline_form"><div class="col-md-12 underline_form"></div></div>
+                       <div class="col-md-12 searchNumbers" id="searchNumbers"></div>
+                       <div id="underlinePlayer"></div>
               		</div>
       				</form>
 
               <div id="tweets" class="tweets"></div>
-              <div id="chartContainer" class="chartContainer"></div>
+              
 	        	</div>
 	      	</div>
     	</div>
 
+  
+  </body>
+  
+  <script type="text/javascript">
 
-    <script type="text/javascript">
         function sendAjaxQuery(url, data) { 
             $('#tweets').load('index.html'+' #tweets');
+            $('#frequency').load('index.html'+' #frequency');
+            $('#playerInfo').load('index.html'+' #playerInfo');
+            $('#searchNumbers').load('index.html'+' #searchNumbers');
+            $('#underlinePlayer').load('index.html'+' #underlinePlayer');
             $.ajax({
                 type: 'POST',
                 url: 'postFile.html',
                 data: data,
                 // dataType: 'json',
-                success: function (data) {
-                  var jsonList = JSON.parse(data);
-                  var dataPointArray = [];
-                  var lastDate='';
-                  var lastDay = 0;
-                  var num=-1;
+                success: function (results) {
+                
+                  var jsonList='';
+                  var jsonList = JSON.parse(results);
 
-                  //console.log(jsonList);
-                  // $('#underline_form').append('<div class="col-md-12 underline_form"></div>');
-                  for(var i in jsonList.data){
-                        var list = jsonList.data[i];
-                        var date = new Date(list.time_str);
-                        var day = date.getDate();
-                        var month = date.getMonth()+1;
-                        var year = date.getFullYear().toString();
-                        var date_string = year+'-'+month.toString()+'-'+day;
-
-                        
-                        $('#tweets').append('<div class="media">'
-                                    +'<a href="#" class="pull-left" style="padding-right:15px;">'
-                                    +'<img src="'+list.author_profile_image+'" class="media-object" alt="" style="border-radius:10px;"/>'
-                                    +'</a>'
-                                    +'<div class="media-body">'
-                                    +'<h4 class="media-heading"><a href="https://twitter.com/'+list.author+'">'+list.author+'</a></h4>'
-                                    +'<p class="date_string">'+date_string+'</p>'
-                                    +'<a style="color:black" href="https://twitter.com/'+list.author+'/status/'+list.tweet_id+'">'+list.contents+'</a>'
-                                    +'</div></div>');     
-
-
-                        if(lastDay === day){
-                          var numString = dataPointArray[num];
-                          var dataNum = parseInt(numString.y)+1;
-                          dataPointArray[num].y = dataNum;
-                        }else{
-                          num+=1;
-                          dataPointArray.push({
-                            x:day, y:1
-                          });
-                        }
-                        lastDay = day;
-
-                  }
-                    
-                  if(dataPointArray.length>0){
-                    makeChart(dataPointArray);
-                  }else{
-                    alert("No result found.")
-                  }
+                  showTweets(jsonList);
                   
+                  var info = jsonList.info;
 
+                  if(info.length>0){
+                    for(var i in info){
+                        var playerName = info[i].authorName;
+                        var image = info[i].image; 
+                        var bg = info[i].bg;     
+                        getInfo(playerName,image,showAuthorInfo);
+                      //}
+                    }
+                  }else{
+                      $('#playerInfo').append('<div class="playerName">no verified User</div>');
+                  }            
                 },
                 error: function (xhr, status, error) { 
                     console.log('Error: ', error);
                     alert('error connecting'); 
                 }
-            });
+            })
         }
 
         $.fn.serializeObject = function () {
@@ -135,37 +144,16 @@
             });
             return o;
         };
+        
 
         function sendData(){
             var form = document.getElementById('submit');
-            sendAjaxQuery('http://localhost:3000/', JSON.stringify($('form').serializeObject()));
+            var json = JSON.stringify($('form').serializeObject());
+            sendAjaxQuery('http://localhost:3000/', json);
         };
 
 
-        function makeChart(dataPointArray) {
-
-            var chart = new CanvasJS.Chart("chartContainer", {
-                      theme: "theme1",//theme1\
-                      backgroundColor: "#F3F3F3",
-                      title:{
-                        text: "Frequency Chart"              
-                      },
-                      animationEnabled: false,   // change to true
-                      data: [              
-                      {
-                        // Change type to "bar", "area", "spline", "pie",etc.
-                        type: "spline",
-                        dataPoints: dataPointArray
-                      }
-                      ]
-                    });
-                    chart.render();
-
-      };
-
-
-
-        var submit = document.getElementById('submit');
+        var submit = document.getElementById('submit'); 
         //submit.onclick=sendData;
         if ($("submit").is(":focus")) {
           $("#submit").focus(sendData);
@@ -173,7 +161,17 @@
           $("#submit").click(sendData);
         }
 
-  
+        // checkbox playerTeam
+        $(document).ready(function(){
+            $('#playerTeam').find('input[type=checkbox]').bind('click', function(){
+                $('#playerTeam').find('input[type=checkbox]').not(this).attr("checked", false);
+            });
+        });
+        //checkbox teamAuthor
+        $(document).ready(function(){
+            $('#teamAuthor').find('input[type=checkbox]').bind('click', function(){
+                $('#teamAuthor').find('input[type=checkbox]').not(this).attr("checked", false);
+            });
+        });
     </script>
-  </body>
 </html>
